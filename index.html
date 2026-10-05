@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ГосПомощник | Цифровая экосистема</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="bg-gradient"></div>
+
+<header class="header">
+    <div class="container">
+        <div class="logo">ГосПомощник <span>| цифровая экосистема</span></div>
+        <div class="nav">
+            <a onclick="showMainView()" id="navMain">Главная</a>
+            <a onclick="showProfileView()" id="profileLink" style="display:none">Личный кабинет</a>
+            <a onclick="showUsersPanel()" id="adminUsersLink" style="display:none">Управление пользователями</a>
+            <div class="theme-toggle" onclick="toggleTheme()">
+                <span class="theme-option" id="themeDark">Тёмная</span>
+                <span class="theme-option" id="themeLight">Светлая</span>
+            </div>
+            <button class="btn btn-primary" id="authBtn" onclick="openAuthModal()">Вход</button>
+            <span id="userName" style="display:none;"></span>
+        </div>
+    </div>
+</header>
+
+<main class="container" id="mainContent"></main>
+
+<!-- Модалки -->
+<div id="authModal" class="modal"><div class="modal-content"><h3>Вход в систему</h3><div class="role-selector"><div class="role-option" onclick="selectRole('citizen')">Гражданин</div><div class="role-option" onclick="selectRole('admin')">Администратор</div></div><div class="form-group"><label>Логин</label><input type="text" id="loginUsername"></div><div class="form-group"><label>Пароль</label><div class="password-wrapper"><input type="password" id="passwordInput"><button type="button" class="toggle-password" onclick="togglePasswordVisibility('passwordInput')">👁</button></div></div><div style="display:flex; gap:12px;"><button class="btn btn-outline" style="flex:1;" onclick="closeAuthModal()">Отмена</button><button class="btn btn-primary" style="flex:1;" onclick="login()">Войти</button></div><div class="forgot-password"><a onclick="openForgotModal()">Забыли пароль?</a></div><div style="text-align:center; margin-top:20px;"><button class="btn btn-ghost" onclick="openRegisterModal()">Зарегистрироваться</button></div></div></div>
+
+<div id="forgotModal" class="modal"><div class="modal-content"><h3>Восстановление пароля</h3><div class="form-group"><label>Введите ваш Email</label><input type="email" id="forgotEmail" placeholder="example@mail.ru"></div><div style="display:flex; gap:12px;"><button class="btn btn-outline" style="flex:1;" onclick="closeForgotModal()">Отмена</button><button class="btn btn-primary" style="flex:1;" onclick="restorePassword()">Восстановить</button></div></div></div>
+
+<div id="registerModal" class="modal"><div class="modal-content"><h3>Регистрация</h3><div class="role-selector"><div class="role-option" onclick="selectRegRole('citizen')">Гражданин</div><div class="role-option" onclick="selectRegRole('admin')">Администратор</div></div><div class="form-group"><label>Логин</label><input type="text" id="regLogin"><div class="error" id="regLoginError" style="color:#ef4444; font-size:12px;"></div></div><div style="display:flex; gap:12px;"><div class="form-group" style="flex:1;"><label>Фамилия</label><input type="text" id="regSurname"><div class="error" id="regSurnameError" style="color:#ef4444; font-size:12px;"></div></div><div class="form-group" style="flex:1;"><label>Имя</label><input type="text" id="regName"><div class="error" id="regNameError" style="color:#ef4444; font-size:12px;"></div></div><div class="form-group" style="flex:1;"><label>Отчество</label><input type="text" id="regPatronymic"><div class="error" id="regPatronymicError" style="color:#ef4444; font-size:12px;"></div></div></div><div class="form-group"><label>Email</label><input type="email" id="regEmailInput"><div class="error" id="regEmailError" style="color:#ef4444; font-size:12px;"></div></div><div class="form-group"><label>Пароль</label><div class="password-wrapper"><input type="password" id="regPasswordInput"><button type="button" class="toggle-password" onclick="togglePasswordVisibility('regPasswordInput')">👁</button></div><div class="error" id="regPasswordError" style="color:#ef4444; font-size:12px;"></div></div><div class="form-group"><label>Подтверждение</label><div class="password-wrapper"><input type="password" id="regPasswordConfirmInput"><button type="button" class="toggle-password" onclick="togglePasswordVisibility('regPasswordConfirmInput')">👁</button></div><div class="error" id="regPasswordConfirmError" style="color:#ef4444; font-size:12px;"></div></div><div style="display:flex; gap:12px;"><button class="btn btn-outline" style="flex:1;" onclick="closeRegisterModal()">Отмена</button><button class="btn btn-primary" style="flex:1;" onclick="register()">Зарегистрироваться</button></div></div></div>
+
+<div id="reviewModal" class="modal"><div class="modal-content"><h3>Написать отзыв</h3><div class="form-group"><label>Оценка</label><select id="reviewRatingSelect"><option value="5">5 - Отлично</option><option value="4">4 - Хорошо</option><option value="3">3 - Удовлетворительно</option><option value="2">2 - Плохо</option><option value="1">1 - Ужасно</option></select></div><div class="form-group"><label>Отзыв</label><textarea id="reviewTextArea" rows="4" placeholder="Поделитесь впечатлениями..."></textarea></div><div style="display:flex; gap:12px;"><button class="btn btn-outline" style="flex:1;" onclick="closeReviewModal()">Отмена</button><button class="btn btn-primary" style="flex:1;" onclick="submitReview()">Отправить</button></div></div></div>
+
+<div id="allReviewsModal" class="modal"><div class="modal-content"><h3 id="allReviewsTitle">Отзывы</h3><div id="allReviewsList" class="reviews-list"></div><button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="closeAllReviewsModal()">Закрыть</button></div></div>
+
+<div id="detailModal" class="modal"><div class="modal-content"><h3 id="detailTitle"></h3><div><span class="service-category" id="detailCategory"></span></div><p><strong>Рейтинг:</strong> <span id="detailRating"></span></p><p><strong>Ссылка:</strong> <span id="detailUrl"></span></p><p><strong>Описание:</strong> <span id="detailDesc"></span></p><p><strong>Теги:</strong> <span id="detailTags"></span></p><div style="display:flex; gap:12px; margin-top:20px;"><button class="btn btn-outline" style="flex:1;" onclick="closeDetailModal()">Закрыть</button><button id="editBtnInModal" style="display:none" class="btn btn-primary" onclick="editCurrentService()">Редактировать</button><button class="btn btn-success" style="flex:1;" onclick="openCurrentServiceUrl()">Открыть</button></div></div></div>
+
+<div id="editModal" class="modal"><div class="modal-content"><h3 id="editModalTitle">Добавление сервиса</h3><form id="serviceForm" onsubmit="saveService(event)"><div class="form-group"><label>Название</label><input type="text" id="serviceName" required></div><div class="form-group"><label>Категория</label><select id="serviceCategory"><option value="family">Семья</option><option value="transport">Транспорт</option><option value="finance">Финансы</option><option value="health">Здоровье</option><option value="education">Образование</option><option value="housing">Жильё</option><option value="digital">Цифровые</option></select></div><div class="form-group"><label>Ссылка</label><input type="url" id="serviceUrl" required></div><div class="form-group"><label>Описание</label><textarea id="serviceDesc" rows="3" required></textarea></div><div class="form-group"><label>Теги</label><input type="text" id="serviceTags" placeholder="налог, документы, здоровье"></div><input type="hidden" id="editId"><div style="display:flex; gap:12px; margin-top:20px;"><button type="button" class="btn btn-outline" style="flex:1;" onclick="closeEditModal()">Отмена</button><button type="submit" class="btn btn-primary" style="flex:1;">Сохранить</button></div></form></div></div>
+
+<script src="script.js"></script>
+</body>
+</html>
